@@ -1,0 +1,40 @@
+type Query {
+    me: User!
+}
+
+type Mutation {
+    login(
+        email: String!
+        password: String!
+    ): AccessToken!
+    registerUser(
+        username: String!
+        password: String!
+        email: String!
+        firstName: String!
+        lastName: String!
+    ): UserRegistration!
+}
+
+type User {
+    id: ID!
+    username: String!
+    email: String!
+    firstName: String!
+    lastName: String!
+}
+
+type UserRegistration {
+    user: User!
+    confirmationToken: AccessToken!
+    confirmedAt: String
+}
+
+type AccessToken {
+    token: String!
+}
+
+input LoginInput {
+    email: String!
+    password: String!
+}

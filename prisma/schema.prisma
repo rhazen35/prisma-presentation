@@ -1,0 +1,83 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PrismaUser {
+  id               String                  @id @default(uuid())
+  username         String                  @unique @db.VarChar(255)
+  password         String?                 @db.VarChar(255)
+  email            String                  @unique @db.VarChar(255)
+  firstName        String                  @db.VarChar(255)
+  lastName         String                  @db.VarChar(255)
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  accessToken      PrismaAccessToken[]
+  userLogin        PrismaUserLogin?
+  userRegistration PrismaUserRegistration?
+  roles            PrismaRole[]
+
+  @@map("users")
+}
+
+model PrismaUserRegistration {
+  id                  String            @id @default(uuid())
+  userId              String            @unique
+  confirmationTokenId String            @unique
+  confirmedAt         DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  confirmationToken   PrismaAccessToken @relation(fields: [confirmationTokenId], references: [id], onDelete: Cascade)
+  user                PrismaUser        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_registrations")
+}
+
+model PrismaUserLogin {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      PrismaUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_logins")
+}
+
+model PrismaAccessToken {
+  id               String                  @id @default(uuid())
+  userId           String
+  createdAt        DateTime                @default(now())
+  expiresAt        DateTime
+  user             PrismaUser              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userRegistration PrismaUserRegistration?
+
+  @@map("access_tokens")
+}
+
+model PrismaRole {
+  id           String            @id @default(uuid())
+  userId       String
+  permissionId String?
+  name         String            @db.VarChar(255)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  permissions  PrismaPermission? @relation(fields: [permissionId], references: [id])
+  users        PrismaUser[]
+
+  @@map("roles")
+}
+
+model PrismaPermission {
+  id        String       @id @default(uuid())
+  name      String       @db.VarChar(255)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  roles     PrismaRole[]
+
+  @@map("permissions")
+}

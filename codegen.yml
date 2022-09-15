@@ -1,0 +1,13 @@
+overwrite: true
+schema: "src/graphql/schema.graphql"
+documents: null
+generates:
+  generated/graphql.ts:
+    plugins:
+      - add:
+          content: "// noinspection JSUnusedGlobalSymbols\n"
+      - typescript
+      - typescript-resolvers
+hooks:
+  afterOneFileWrite:
+    - 'bash -vc "npx eslint --fix --no-ignore \$1 &> /dev/null; exit 0" -- '
